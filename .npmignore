@@ -2,3 +2,6 @@ public
 styles
 pages
 .next
+openapi.yaml
+next-env.d.ts
+tsconfig.json
