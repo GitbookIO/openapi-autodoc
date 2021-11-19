@@ -1,0 +1,1326 @@
+openapi: 3.0.3
+info:
+  title: GitBook API
+  description: The GitBook API
+  termsOfService: https://policies.gitbook.com
+  contact:
+    name: API Support
+    url: https://gitbook.com/support
+    email: support@gitbook.com
+  version: 0.0.1-beta
+servers:
+  - url: https://api.gitbook.com/v1
+    description: production
+components:
+  securitySchemes:
+    PersonalAccessToken:
+      type: http
+      scheme: bearer
+  schemas:
+    AnalyticsPageItem:
+      required:
+        - page
+        - title
+        - pageViews
+      properties:
+        page:
+          type: string
+        title:
+          type: string
+        pageViews:
+          type: number
+        feedbacks:
+          type: object
+          required:
+            - score
+            - total
+            - rating
+            - bad
+            - ok
+            - good
+          properties:
+            score:
+              type: number
+            total:
+              type: number
+            rating:
+              type: string
+              enum:
+                - unknown
+                - bad
+                - ok
+                - good
+            bad:
+              type: number
+            ok:
+              type: number
+            good:
+              type: number
+    SpaceContentAnalytics:
+      required:
+        - pages
+      properties:
+        pages:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalyticsPageItem'
+    SpaceTrafficAnalytics:
+      required:
+        - count
+        - views
+      properties:
+        count:
+          type: integer
+        views:
+          type: array
+          items:
+            type: object
+            properties:
+              timestamp:
+                type: string
+              count:
+                type: integer
+    AnalyticsSearchIetm:
+      required:
+        - query
+        - searches
+        - hits
+        - pageHits
+        - sectionHits
+      properties:
+        query:
+          type: string
+        searches:
+          type: number
+        hits:
+          type: number
+        pageHits:
+          type: number
+        sectionHits:
+          type: number
+    SpaceSearchAnalytics:
+      required:
+        - searches
+        - queries
+      properties:
+        searches:
+          type: number
+        queries:
+          type: array
+          items:
+            $ref: '#/components/schemas/AnalyticsSearchIetm'
+    Collection:
+      required:
+        - id
+        - title
+        - visibility
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        path:
+          type: string
+        visibility:
+          type: string
+          enum:
+            - public
+            - unlisted
+            - share-link
+            - visitor-auth
+            - private
+        publishingType:
+          type: string
+          enum:
+            - variants
+        primarySpace:
+          type: string
+    NewChangeRequest:
+      required:
+        - changeRequest
+      properties:
+        changeRequest:
+          type: string
+    MergedChangeRequest:
+      required:
+        - result
+        - revision
+      properties:
+        result:
+          type: string
+          enum:
+            - merge
+            - conflicts
+        revision:
+          type: string
+    RevisionContent:
+      required:
+        - id
+        - parents
+        - pages
+        - files
+      properties:
+        id:
+          type: string
+        parents:
+          type: array
+          items:
+            type: string
+        pages:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevisionPage'
+        files:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevisionFile'
+    RevisionFile:
+      required:
+        - id
+        - name
+        - contentType
+        - downloadURL
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        contentType:
+          type: string
+        downloadURL:
+          type: string
+    RevisionPage:
+      required:
+        - id
+        - title
+        - kind
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        kind:
+          type: string
+          enum:
+            - sheet
+            - group
+            - link
+        path:
+          type: string
+        description:
+          type: string
+        pages:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevisionPage'
+        href:
+          type: string
+          nullable: true
+    PaginationState:
+      required:
+        - next
+      properties:
+        page:
+          type: string
+    PaginatedOrgsList:
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Organization'
+        next:
+          $ref: '#/components/schemas/PaginationState'
+    PaginatedSpacesList:
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/Space'
+        next:
+          $ref: '#/components/schemas/PaginationState'
+    PaginatedPageSearchResultsList:
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchPageResult'
+        next:
+          $ref: '#/components/schemas/PaginationState'
+    PaginatedRevisionFilesList:
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/RevisionFile'
+        next:
+          $ref: '#/components/schemas/PaginationState'
+    Organization:
+      required:
+        - kind
+        - id
+        - title
+      properties:
+        kind:
+          type: string
+          enum:
+            - org
+        id:
+          type: string
+        title:
+          type: string
+    Space:
+      required:
+        - id
+        - title
+        - visibility
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        path:
+          type: string
+        visibility:
+          type: string
+          enum:
+            - public
+            - unlisted
+            - share-link
+            - visitor-auth
+            - in-collection
+            - private
+    SearchPageResult:
+      required:
+        - id
+        - title
+        - path
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        path:
+          type: string
+        sections:
+          type: array
+          items:
+            $ref: '#/components/schemas/SearchSectionResult'
+    SearchSectionResult:
+      required:
+        - id
+        - title
+        - body
+        - url
+      properties:
+        id:
+          type: string
+        title:
+          type: string
+        body:
+          type: string
+        url:
+          type: string
+    User:
+      required:
+        - kind
+        - id
+        - displayName
+      properties:
+        kind:
+          type: string
+          enum:
+            - user
+        id:
+          type: string
+        displayName:
+          type: string
+        photoURL:
+          type: string
+          format: uri
+        email:
+          type: string
+          format: email
+security:
+  - PersonalAccessToken: []
+tags:
+  - name: Analytics
+    description: Get usage statistics for your content
+  - name: Collections
+    description: Get information about your collections
+  - name: Organizations
+    description: Get and manage your organizations
+  - name: Owners
+    description: Manage content whether owned by a user or an organization
+  - name: Change Requests
+    description: View, Create, and Merge Change Requests in your spaces
+  - name: Content
+    description: View the content in your spaces, change requests, and previous revisions
+  - name: Revisions
+    description: View information about your spaces previous revisions
+  - name: Spaces
+    description: Import, Export and Search spaces
+  - name: Users
+    description: View the logged in user, and their spaces
+paths:
+  /spaces/{space}/analytics/content:
+    get:
+      tags:
+        - Analytics
+      summary: Get the aggregated analytics for pages.
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The aggregated analytics for pages.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceContentAnalytics'
+              example:
+                pages:
+                  - page: intro
+                    title: Introduction
+                    pageViews: 12
+                    feedbacks:
+                      score: 4.5
+                      total: 5
+                      rating: good
+                      bad: 1
+                      ok: 0
+                      good: 9
+  /spaces/{space}/analytics/search:
+    get:
+      tags:
+        - Analytics
+      summary: Get aggregated search analytics.
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: period
+          required: false
+          in: query
+          schema:
+            type: string
+            enum:
+              - last_month
+              - last_week
+              - last_year
+      responses:
+        '200':
+          description: The aggregated search analytics.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceSearchAnalytics'
+              example:
+                searches: 5
+                queries:
+                  - query: git commit
+                    searches: 5
+                    hits: 5
+                    pageHits: 3
+                    sectionHits: 2
+  /spaces/{space}/analytics/traffic:
+    get:
+      tags:
+        - Analytics
+      summary: Get the traffic over time.
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: interval
+          in: query
+          required: false
+          schema:
+            type: string
+            enum:
+              - weekly
+              - daily
+              - monthly
+            default: weekly
+      responses:
+        '200':
+          description: The traffic over time.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/SpaceTrafficAnalytics'
+              example:
+                count: 1
+                views:
+                  - timestamp: '2021-01-01T00:00:00.000Z'
+                    count: 1
+  /spaces/{collection}:
+    get:
+      tags:
+        - Collections
+      summary: Get a collection
+      parameters:
+        - name: collection
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Collection'
+              example:
+                id: '1234'
+                title: API Docs
+                path: api-docs
+                visibility: public
+  /spaces/{collection}/content:
+    get:
+      tags:
+        - Collections
+      summary: List content in a collection
+      parameters:
+        - name: collection
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSpacesList'
+              example:
+                items:
+                  - id: '1234'
+                    title: API Docs
+                    path: api-docs
+                    visibility: public
+                next:
+                  page: '1235'
+  /orgs/{org}/billing:
+    post:
+      tags:
+        - Organizations
+      summary: Upgrade an organization
+      parameters:
+        - name: org
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: product
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - free
+              - team
+              - business
+        - name: interval
+          in: query
+          required: true
+          schema:
+            type: string
+            enum:
+              - monthly
+              - yearly
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  sessionId:
+                    type: string
+              example:
+                sessionId: '12345'
+    get:
+      tags:
+        - Organizations
+      summary: Get billing portal for an organization
+      parameters:
+        - name: org
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  url:
+                    type: string
+  /orgs/{org}/members/{member}/sso:
+    post:
+      tags:
+        - Organizations
+      summary: Upgrade a user as an SSO member
+      parameters:
+        - name: member
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: org
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example: {}
+  /orgs:
+    get:
+      tags:
+        - Organizations
+      summary: Get a list of the current authenticated user's organizations
+      description: Returns the orgs assigned to the current authenticated user
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedOrgsList'
+              example:
+                items:
+                  - kind: org
+                    id: BDlA4ODxn0VbnUb1J42T
+                    title: Typescript Docs
+                next:
+                  page: HHUrlfxFPVNJTvrPOCKLjvO9wea2
+  /owner/{owner}/search:
+    get:
+      tags:
+        - Owners
+      summary: Search content in a space
+      parameters:
+        - name: owner
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: query
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: number
+        - name: page
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPageSearchResultsList'
+              example:
+                items:
+                  - id: pageID
+                    title: Page Title
+                    sections: []
+                  - ...
+  /owners/{ownerId}/spaces:
+    get:
+      tags:
+        - Owners
+      summary: Returns the spaces for either a user or an organization
+      parameters:
+        - name: ownerId
+          in: path
+          required: true
+          description: Either a user id or an organization ID
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSpacesList'
+              example:
+                items:
+                  - id: '1234'
+                    title: API Docs
+                    path: api-docs
+                    visibility: public
+                next:
+                  page: '1235'
+  /spaces/{space}/change-requests:
+    post:
+      tags:
+        - Change Requests
+      summary: Create a change request on a space
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Change request created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NewChangeRequest'
+              example:
+                changeRequest: '123456'
+  /spaces/{space}/change-requests/{changeRequest}/merge:
+    post:
+      tags:
+        - Change Requests
+      summary: Merge a change request.
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: changeRequest
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The change request was either merged or there were conflicts.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MergedChangeRequest'
+              example:
+                result: merge
+                revision: '123456'
+  /spaces/{space}/content:
+    get:
+      tags:
+        - Content
+      description: Get content for a space
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current or specific revision's content for the space
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionContent'
+              example:
+                id: r-2
+                parents:
+                  - r-1
+                pages:
+                  - id: p-1
+                    title: Introduction
+                    kind: sheet
+                    description: Home page
+                    path: home
+                    pages: []
+                files: []
+  /spaces/{space}/change-requests/{changeRequest}/content:
+    get:
+      tags:
+        - Content
+        - Change Requests
+      description: Get a change request content for a space
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: changeRequest
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current or specific revision's content for the space
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionContent'
+              example:
+                id: r-2
+                parents:
+                  - r-1
+                pages:
+                  - id: p-1
+                    title: Introduction
+                    kind: sheet
+                    description: Home page
+                    path: home
+                    pages: []
+                files: []
+  /spaces/{space}/revisions/{revision}:
+    get:
+      tags:
+        - Content
+        - Revisions
+      description: Get a specific revision content for a space
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: revision
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current or specific revision's content for the space
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionContent'
+              example:
+                id: r-2
+                parents:
+                  - r-1
+                pages:
+                  - id: p-1
+                    title: Introduction
+                    kind: sheet
+                    description: Home page
+                    path: home
+                    pages: []
+                files: []
+  /spaces/{space}/content/files:
+    get:
+      tags:
+        - Content
+      description: Get a revision's files for a space
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current or specific revision's files for the space
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRevisionFilesList'
+              example:
+                items:
+                  - id: f-1
+                    name: logo.png
+                    contentType: img/png
+                    downloadURL: ...
+  /spaces/{space}/change-requests/{changeRequest}/content/files:
+    get:
+      tags:
+        - Content
+        - Change Requests
+      description: Get a change request's files for a space
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: changeRequest
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current or specific revision's files for the space
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRevisionFilesList'
+              example:
+                items:
+                  - id: f-1
+                    name: logo.png
+                    contentType: img/png
+                    downloadURL: ...
+  /spaces/{space}/revisions/{revision}/files:
+    get:
+      tags:
+        - Content
+        - Revisions
+      description: Get a specific revision's files for a space
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: revision
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current or specific revision's files for the space
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRevisionFilesList'
+              example:
+                items:
+                  - id: f-1
+                    name: logo.png
+                    contentType: img/png
+                    downloadURL: ...
+  /spaces/{space}/content/page/{page}:
+    get:
+      tags:
+        - Content
+        - Revisions
+      summary: Get a revision's files for a space
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current or specific revision's page for the space
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionPage'
+              example:
+                id: p-1
+                title: Introduction
+                kind: sheet
+                description: Home page
+                path: home
+                document:
+                  ...: null
+                pages: []
+  /spaces/{space}/change-requests/{changeRequest}/content/id/{page}:
+    get:
+      tags:
+        - Content
+        - Change Requests
+      summary: Get a change request's files for a space
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: changeRequest
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current or specific revision's page for the space
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionPage'
+              example:
+                id: p-1
+                title: Introduction
+                kind: sheet
+                description: Home page
+                path: home
+                document:
+                  ...: null
+                pages: []
+  /spaces/{space}/revisions/{revision}/page/{page}:
+    get:
+      tags:
+        - Content
+        - Revisions
+      summary: Get a specific revision's files for a space
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: page
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: revision
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current or specific revision's page for the space
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionPage'
+              example:
+                id: p-1
+                title: Introduction
+                kind: sheet
+                description: Home page
+                path: home
+                document:
+                  ...: null
+                pages: []
+  /spaces/{space}/content/url/{url}:
+    get:
+      tags:
+        - Content
+        - Revisions
+      summary: Get a revision's files for a space
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: url
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current or specific revision's page for the space
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionPage'
+              example:
+                id: p-1
+                title: Introduction
+                kind: sheet
+                description: Home page
+                path: home
+                document:
+                  ...: null
+                pages: []
+  /spaces/{space}/change-requests/{changeRequest}/content/url/{url}:
+    get:
+      tags:
+        - Content
+        - Change Requests
+      summary: Get a change request's files for a space
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: url
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: changeRequest
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current or specific revision's page for the space
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionPage'
+              example:
+                id: p-1
+                title: Introduction
+                kind: sheet
+                description: Home page
+                path: home
+                document:
+                  ...: null
+                pages: []
+  /spaces/{space}/revisions/{revision}/url/{url}:
+    get:
+      tags:
+        - Content
+        - Revisions
+      summary: Get a specific revision's files for a space
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: url
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: revision
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The current or specific revision's page for the space
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RevisionPage'
+              example:
+                id: p-1
+                title: Introduction
+                kind: sheet
+                description: Home page
+                path: home
+                document:
+                  ...: null
+                pages: []
+  /spaces/{space}/import:
+    post:
+      tags:
+        - Spaces
+      summary: Import a Git repository
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: changeRequest
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: url
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: ref
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: force
+          in: query
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example: {}
+  /spaces/{space}/export:
+    post:
+      tags:
+        - Spaces
+      summary: Export the current Revision of a Space to a Git repository
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: changeRequest
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: page
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: url
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: remoteRef
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: auth
+          in: query
+          required: false
+          schema:
+            type: object
+            properties:
+              username:
+                type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              example: {}
+  /spaces/{space}/search:
+    get:
+      tags:
+        - Spaces
+      summary: Search content in a space
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: query
+          in: query
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: number
+        - name: page
+          in: query
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedPageSearchResultsList'
+              example:
+                items:
+                  - id: pageID
+                    title: Page Title
+                    sections: []
+                  - ...
+  /spaces/{space}:
+    get:
+      tags:
+        - Spaces
+      summary: Get information about a space
+      description: |
+        Returns the top level attributes of a space.
+      parameters:
+        - name: space
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Space'
+              example:
+                id: '1234'
+                title: API Docs
+                path: api-docs
+                visibility: public
+  /user:
+    get:
+      tags:
+        - Users
+      summary: Get the current authenticated user
+      description: >
+        Returns details about the user associated with the token provided in the
+        request's authorization header.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+              example:
+                kind: user
+                id: HHUrlfxFPVNJTvrPOCKLjvO9wea2
+                displayName: Johnny Appleseed
+                email: johnny@example.com
+  /user/spaces:
+    get:
+      tags:
+        - Users
+      summary: Get the current authenticated user's spaces
+      description: >
+        Returns a paginated list of the currently authenticated user's personal
+        spaces. Spaces in *organizations* that the user is a member of are not
+        included in this response.
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedSpacesList'
+              example:
+                items:
+                  - id: '1234'
+                    title: API Docs
+                    path: api-docs
+                    visibility: public
+                next:
+                  page: '1235'
