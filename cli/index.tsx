@@ -1,8 +1,9 @@
 #!/usr/bin/env node
-import { resolve, join, basename } from "path";
+import { resolve, basename } from "path";
 import fs from "fs/promises";
 import { Command } from "commander";
 import { cliEntrypoint } from "../lib";
+import "core-js/actual/string/replace-all";
 
 const program = new Command();
 
