@@ -99,6 +99,15 @@ export function collateTags(api: OpenAPI.Document) {
       );
     }
   );
+
+  /*
+   * OpenAPI doesn't require a tag to be defined at the spec level, ad-hoc tags
+   * can be defined at the operation level. To support this, we will generate
+   * them on the fly, but we need to cache them so that we can use the same
+   * object to key the tagMap. Otherwise, we end up with duplicate keys.
+   */
+  const generatedTagCache = new Set<TagObject>();
+
   operations.forEach(({ path, operation, operationObject }) => {
     if (operationObject.tags.length === 0) {
       tagMap.set(untaggedTag, [
@@ -107,9 +116,22 @@ export function collateTags(api: OpenAPI.Document) {
       ]);
     }
     operationObject.tags.forEach((tagName) => {
-      const tag: TagObject = api.tags.find(({ name }) => {
-        return name === tagName;
-      });
+      let tag: TagObject;
+      if (api.tags) {
+        tag = api.tags.find(({ name }) => {
+          return name === tagName;
+        });
+      } else {
+        const retreivedTag = Array.from(generatedTagCache.values()).find(
+          ({ name }) => name === tagName
+        );
+        if (retreivedTag) {
+          tag = retreivedTag;
+        } else {
+          tag = { name: tagName };
+          generatedTagCache.add(tag);
+        }
+      }
       tagMap.set(tag, [
         ...(tagMap.get(tag) || []),
         { path, operation, operationObject },

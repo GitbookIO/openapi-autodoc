@@ -20622,9 +20622,9 @@ var require_lib4 = __commonJS({
   }
 });
 
-// ../../../../node_modules/case/dist/Case.js
+// node_modules/case/dist/Case.js
 var require_Case = __commonJS({
-  "../../../../node_modules/case/dist/Case.js"(exports, module2) {
+  "node_modules/case/dist/Case.js"(exports, module2) {
     (function() {
       "use strict";
       var unicodes = function(s, prefix) {
@@ -30023,6 +30023,7 @@ function collateTags(api) {
       return { path, operation, operationObject };
     });
   });
+  const generatedTagCache = new Set();
   operations.forEach(({ path, operation, operationObject }) => {
     if (operationObject.tags.length === 0) {
       tagMap.set(untaggedTag, [
@@ -30031,9 +30032,20 @@ function collateTags(api) {
       ]);
     }
     operationObject.tags.forEach((tagName) => {
-      const tag = api.tags.find(({ name }) => {
-        return name === tagName;
-      });
+      let tag;
+      if (api.tags) {
+        tag = api.tags.find(({ name }) => {
+          return name === tagName;
+        });
+      } else {
+        const retreivedTag = Array.from(generatedTagCache.values()).find(({ name }) => name === tagName);
+        if (retreivedTag) {
+          tag = retreivedTag;
+        } else {
+          tag = { name: tagName };
+          generatedTagCache.add(tag);
+        }
+      }
       tagMap.set(tag, [
         ...tagMap.get(tag) || [],
         { path, operation, operationObject }
