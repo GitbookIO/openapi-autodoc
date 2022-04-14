@@ -514,7 +514,7 @@ var require_command = __commonJS({
   "node_modules/commander/lib/command.js"(exports) {
     var EventEmitter = require("events").EventEmitter;
     var childProcess = require("child_process");
-    var path2 = require("path");
+    var path = require("path");
     var fs2 = require("fs");
     var { Argument, humanReadableArgName } = require_argument();
     var { CommanderError } = require_error();
@@ -928,7 +928,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
         if (!this._scriptPath && require.main) {
           this._scriptPath = require.main.filename;
         }
-        this._name = this._name || this._scriptPath && path2.basename(this._scriptPath, path2.extname(this._scriptPath));
+        this._name = this._name || this._scriptPath && path.basename(this._scriptPath, path.extname(this._scriptPath));
         return userArgs;
       }
       parse(argv, parseOptions) {
@@ -953,15 +953,15 @@ Expecting one of '${allowedValues.join("', '")}'`);
         let baseDir;
         try {
           const resolvedLink = fs2.realpathSync(scriptPath);
-          baseDir = path2.dirname(resolvedLink);
+          baseDir = path.dirname(resolvedLink);
         } catch (e) {
           baseDir = ".";
         }
-        let bin = path2.basename(scriptPath, path2.extname(scriptPath)) + "-" + subcommand._name;
+        let bin = path.basename(scriptPath, path.extname(scriptPath)) + "-" + subcommand._name;
         if (subcommand._executableFile) {
           bin = subcommand._executableFile;
         }
-        const localBin = path2.join(baseDir, bin);
+        const localBin = path.join(baseDir, bin);
         if (fs2.existsSync(localBin)) {
           bin = localBin;
         } else {
@@ -971,7 +971,7 @@ Expecting one of '${allowedValues.join("', '")}'`);
             }
           });
         }
-        launchWithNode = sourceExt.includes(path2.extname(bin));
+        launchWithNode = sourceExt.includes(path.extname(bin));
         let proc;
         if (process.platform !== "win32") {
           if (launchWithNode) {
@@ -2144,11 +2144,11 @@ var require_lodash = __commonJS({
       }
       return -1;
     }
-    function baseGet(object, path2) {
-      path2 = isKey(path2, object) ? [path2] : castPath(path2);
-      var index = 0, length = path2.length;
+    function baseGet(object, path) {
+      path = isKey(path, object) ? [path] : castPath(path);
+      var index = 0, length = path.length;
       while (object != null && index < length) {
-        object = object[toKey(path2[index++])];
+        object = object[toKey(path[index++])];
       }
       return index && index == length ? object : void 0;
     }
@@ -2266,8 +2266,8 @@ var require_lodash = __commonJS({
     function toString2(value) {
       return value == null ? "" : baseToString(value);
     }
-    function get(object, path2, defaultValue) {
-      var result = object == null ? void 0 : baseGet(object, path2);
+    function get(object, path, defaultValue) {
+      var result = object == null ? void 0 : baseGet(object, path);
       return result === void 0 ? defaultValue : result;
     }
     module2.exports = get;
@@ -2578,13 +2578,13 @@ var require_Report = __commonJS({
       }, validationTimeout);
     };
     Report.prototype.getPath = function(returnPathAsString) {
-      var path2 = [];
+      var path = [];
       if (this.parentReport) {
-        path2 = path2.concat(this.parentReport.path);
+        path = path.concat(this.parentReport.path);
       }
-      path2 = path2.concat(this.path);
+      path = path.concat(this.path);
       if (returnPathAsString !== true) {
-        path2 = "#/" + path2.map(function(segment) {
+        path = "#/" + path.map(function(segment) {
           segment = segment.toString();
           if (Utils.isAbsoluteUri(segment)) {
             return "uri(" + segment + ")";
@@ -2592,23 +2592,23 @@ var require_Report = __commonJS({
           return segment.replace(/\~/g, "~0").replace(/\//g, "~1");
         }).join("/");
       }
-      return path2;
+      return path;
     };
     Report.prototype.getSchemaId = function() {
       if (!this.rootSchema) {
         return null;
       }
-      var path2 = [];
+      var path = [];
       if (this.parentReport) {
-        path2 = path2.concat(this.parentReport.path);
+        path = path.concat(this.parentReport.path);
       }
-      path2 = path2.concat(this.path);
-      while (path2.length > 0) {
-        var obj = get(this.rootSchema, path2);
+      path = path.concat(this.path);
+      while (path.length > 0) {
+        var obj = get(this.rootSchema, path);
         if (obj && obj.id) {
           return obj.id;
         }
-        path2.pop();
+        path.pop();
       }
       return this.rootSchema.id;
     };
@@ -9705,10 +9705,10 @@ var require_SchemaCompilation = __commonJS({
       res = res.replace(/##/, "#");
       return res;
     }
-    function collectReferences(obj, results, scope, path2) {
+    function collectReferences(obj, results, scope, path) {
       results = results || [];
       scope = scope || [];
-      path2 = path2 || [];
+      path = path || [];
       if (typeof obj !== "object" || obj === null) {
         return results;
       }
@@ -9720,7 +9720,7 @@ var require_SchemaCompilation = __commonJS({
           ref: mergeReference(scope, obj.$ref),
           key: "$ref",
           obj,
-          path: path2.slice(0)
+          path: path.slice(0)
         });
       }
       if (typeof obj.$schema === "string" && typeof obj.__$schemaResolved === "undefined") {
@@ -9728,16 +9728,16 @@ var require_SchemaCompilation = __commonJS({
           ref: mergeReference(scope, obj.$schema),
           key: "$schema",
           obj,
-          path: path2.slice(0)
+          path: path.slice(0)
         });
       }
       var idx;
       if (Array.isArray(obj)) {
         idx = obj.length;
         while (idx--) {
-          path2.push(idx.toString());
-          collectReferences(obj[idx], results, scope, path2);
-          path2.pop();
+          path.push(idx.toString());
+          collectReferences(obj[idx], results, scope, path);
+          path.pop();
         }
       } else {
         var keys = Object.keys(obj);
@@ -9746,9 +9746,9 @@ var require_SchemaCompilation = __commonJS({
           if (keys[idx].indexOf("__$") === 0) {
             continue;
           }
-          path2.push(keys[idx]);
-          collectReferences(obj[keys[idx]], results, scope, path2);
-          path2.pop();
+          path.push(keys[idx]);
+          collectReferences(obj[keys[idx]], results, scope, path);
+          path.pop();
         }
       }
       if (typeof obj.id === "string") {
@@ -15930,10 +15930,10 @@ var require_spec = __commonJS({
       let paths = Object.keys(api.paths || {});
       let operationIds = [];
       for (let pathName of paths) {
-        let path2 = api.paths[pathName];
+        let path = api.paths[pathName];
         let pathId = "/paths" + pathName;
-        if (path2 && pathName.indexOf("/") === 0) {
-          validatePath(api, path2, pathId, operationIds);
+        if (path && pathName.indexOf("/") === 0) {
+          validatePath(api, path, pathId, operationIds);
         }
       }
       let definitions = Object.keys(api.definitions || {});
@@ -15943,9 +15943,9 @@ var require_spec = __commonJS({
         validateRequiredPropertiesExist(definition, definitionId);
       }
     }
-    function validatePath(api, path2, pathId, operationIds) {
+    function validatePath(api, path, pathId, operationIds) {
       for (let operationName of swaggerMethods) {
-        let operation = path2[operationName];
+        let operation = path[operationName];
         let operationId = pathId + "/" + operationName;
         if (operation) {
           let declaredOperationId = operation.operationId;
@@ -15956,7 +15956,7 @@ var require_spec = __commonJS({
               throw ono.syntax(`Validation failed. Duplicate operation id '${declaredOperationId}'`);
             }
           }
-          validateParameters(api, path2, pathId, operation, operationId);
+          validateParameters(api, path, pathId, operation, operationId);
           let responses = Object.keys(operation.responses || {});
           for (let responseName of responses) {
             let response = operation.responses[responseName];
@@ -15966,8 +15966,8 @@ var require_spec = __commonJS({
         }
       }
     }
-    function validateParameters(api, path2, pathId, operation, operationId) {
-      let pathParams = path2.parameters || [];
+    function validateParameters(api, path, pathId, operation, operationId) {
+      let pathParams = path.parameters || [];
       let operationParams = operation.parameters || [];
       try {
         checkForDuplicates(pathParams);
@@ -16163,50 +16163,50 @@ var require_url = __commonJS({
       if (process.browser) {
         return location.href;
       }
-      let path2 = process.cwd();
-      let lastChar = path2.slice(-1);
+      let path = process.cwd();
+      let lastChar = path.slice(-1);
       if (lastChar === "/" || lastChar === "\\") {
-        return path2;
+        return path;
       } else {
-        return path2 + "/";
+        return path + "/";
       }
     };
-    exports.getProtocol = function getProtocol(path2) {
-      let match = protocolPattern.exec(path2);
+    exports.getProtocol = function getProtocol(path) {
+      let match = protocolPattern.exec(path);
       if (match) {
         return match[1].toLowerCase();
       }
     };
-    exports.getExtension = function getExtension(path2) {
-      let lastDot = path2.lastIndexOf(".");
+    exports.getExtension = function getExtension(path) {
+      let lastDot = path.lastIndexOf(".");
       if (lastDot >= 0) {
-        return url.stripQuery(path2.substr(lastDot).toLowerCase());
+        return url.stripQuery(path.substr(lastDot).toLowerCase());
       }
       return "";
     };
-    exports.stripQuery = function stripQuery(path2) {
-      let queryIndex = path2.indexOf("?");
+    exports.stripQuery = function stripQuery(path) {
+      let queryIndex = path.indexOf("?");
       if (queryIndex >= 0) {
-        path2 = path2.substr(0, queryIndex);
+        path = path.substr(0, queryIndex);
       }
-      return path2;
+      return path;
     };
-    exports.getHash = function getHash(path2) {
-      let hashIndex = path2.indexOf("#");
+    exports.getHash = function getHash(path) {
+      let hashIndex = path.indexOf("#");
       if (hashIndex >= 0) {
-        return path2.substr(hashIndex);
+        return path.substr(hashIndex);
       }
       return "#";
     };
-    exports.stripHash = function stripHash(path2) {
-      let hashIndex = path2.indexOf("#");
+    exports.stripHash = function stripHash(path) {
+      let hashIndex = path.indexOf("#");
       if (hashIndex >= 0) {
-        path2 = path2.substr(0, hashIndex);
+        path = path.substr(0, hashIndex);
       }
-      return path2;
+      return path;
     };
-    exports.isHttp = function isHttp(path2) {
-      let protocol = url.getProtocol(path2);
+    exports.isHttp = function isHttp(path) {
+      let protocol = url.getProtocol(path);
       if (protocol === "http" || protocol === "https") {
         return true;
       } else if (protocol === void 0) {
@@ -16215,48 +16215,48 @@ var require_url = __commonJS({
         return false;
       }
     };
-    exports.isFileSystemPath = function isFileSystemPath(path2) {
+    exports.isFileSystemPath = function isFileSystemPath(path) {
       if (process.browser) {
         return false;
       }
-      let protocol = url.getProtocol(path2);
+      let protocol = url.getProtocol(path);
       return protocol === void 0 || protocol === "file";
     };
-    exports.fromFileSystemPath = function fromFileSystemPath(path2) {
+    exports.fromFileSystemPath = function fromFileSystemPath(path) {
       if (isWindows) {
-        path2 = path2.replace(/\\/g, "/");
+        path = path.replace(/\\/g, "/");
       }
-      path2 = encodeURI(path2);
+      path = encodeURI(path);
       for (let i = 0; i < urlEncodePatterns.length; i += 2) {
-        path2 = path2.replace(urlEncodePatterns[i], urlEncodePatterns[i + 1]);
+        path = path.replace(urlEncodePatterns[i], urlEncodePatterns[i + 1]);
       }
-      return path2;
+      return path;
     };
-    exports.toFileSystemPath = function toFileSystemPath(path2, keepFileProtocol) {
-      path2 = decodeURI(path2);
+    exports.toFileSystemPath = function toFileSystemPath(path, keepFileProtocol) {
+      path = decodeURI(path);
       for (let i = 0; i < urlDecodePatterns.length; i += 2) {
-        path2 = path2.replace(urlDecodePatterns[i], urlDecodePatterns[i + 1]);
+        path = path.replace(urlDecodePatterns[i], urlDecodePatterns[i + 1]);
       }
-      let isFileUrl = path2.substr(0, 7).toLowerCase() === "file://";
+      let isFileUrl = path.substr(0, 7).toLowerCase() === "file://";
       if (isFileUrl) {
-        path2 = path2[7] === "/" ? path2.substr(8) : path2.substr(7);
-        if (isWindows && path2[1] === "/") {
-          path2 = path2[0] + ":" + path2.substr(1);
+        path = path[7] === "/" ? path.substr(8) : path.substr(7);
+        if (isWindows && path[1] === "/") {
+          path = path[0] + ":" + path.substr(1);
         }
         if (keepFileProtocol) {
-          path2 = "file:///" + path2;
+          path = "file:///" + path;
         } else {
           isFileUrl = false;
-          path2 = isWindows ? path2 : "/" + path2;
+          path = isWindows ? path : "/" + path;
         }
       }
       if (isWindows && !isFileUrl) {
-        path2 = path2.replace(forwardSlashPattern, "\\");
-        if (path2.substr(1, 2) === ":\\") {
-          path2 = path2[0].toUpperCase() + path2.substr(1);
+        path = path.replace(forwardSlashPattern, "\\");
+        if (path.substr(1, 2) === ":\\") {
+          path = path[0].toUpperCase() + path.substr(1);
         }
       }
-      return path2;
+      return path;
     };
     exports.safePointerToPath = function safePointerToPath(pointer) {
       if (pointer.length <= 1 || pointer[0] !== "#" || pointer[1] !== "/") {
@@ -16342,15 +16342,15 @@ var require_errors = __commonJS({
     };
     setErrorName(UnmatchedResolverError);
     var MissingPointerError = exports.MissingPointerError = class MissingPointerError extends JSONParserError {
-      constructor(token, path2) {
-        super(`Token "${token}" does not exist.`, stripHash(path2));
+      constructor(token, path) {
+        super(`Token "${token}" does not exist.`, stripHash(path));
         this.code = "EMISSINGPOINTER";
       }
     };
     setErrorName(MissingPointerError);
     var InvalidPointerError = exports.InvalidPointerError = class InvalidPointerError extends JSONParserError {
-      constructor(pointer, path2) {
-        super(`Invalid $ref pointer "${pointer}". Pointers must begin with "#/"`, stripHash(path2));
+      constructor(pointer, path) {
+        super(`Invalid $ref pointer "${pointer}". Pointers must begin with "#/"`, stripHash(path));
         this.code = "EINVALIDPOINTER";
       }
     };
@@ -19318,22 +19318,22 @@ var require_file = __commonJS({
       },
       read(file) {
         return new Promise((resolve2, reject) => {
-          let path2;
+          let path;
           try {
-            path2 = url.toFileSystemPath(file.url);
+            path = url.toFileSystemPath(file.url);
           } catch (err) {
             reject(new ResolverError(ono.uri(err, `Malformed URI: ${file.url}`), file.url));
           }
           try {
-            fs2.readFile(path2, (err, data) => {
+            fs2.readFile(path, (err, data) => {
               if (err) {
-                reject(new ResolverError(ono(err, `Error opening file "${path2}"`), path2));
+                reject(new ResolverError(ono(err, `Error opening file "${path}"`), path));
               } else {
                 resolve2(data);
               }
             });
           } catch (err) {
-            reject(new ResolverError(ono(err, `Error opening file "${path2}"`), path2));
+            reject(new ResolverError(ono(err, `Error opening file "${path}"`), path));
           }
         });
       }
@@ -19489,13 +19489,13 @@ var require_normalize_args = __commonJS({
     var Options = require_options();
     module2.exports = normalizeArgs;
     function normalizeArgs(args) {
-      let path2, schema, options, callback;
+      let path, schema, options, callback;
       args = Array.prototype.slice.call(args);
       if (typeof args[args.length - 1] === "function") {
         callback = args.pop();
       }
       if (typeof args[0] === "string") {
-        path2 = args[0];
+        path = args[0];
         if (typeof args[2] === "object") {
           schema = args[1];
           options = args[2];
@@ -19504,7 +19504,7 @@ var require_normalize_args = __commonJS({
           options = args[1];
         }
       } else {
-        path2 = "";
+        path = "";
         schema = args[0];
         options = args[1];
       }
@@ -19512,7 +19512,7 @@ var require_normalize_args = __commonJS({
         options = new Options(options);
       }
       return {
-        path: path2,
+        path,
         schema,
         options,
         callback
@@ -19582,10 +19582,10 @@ var require_pointer = __commonJS({
     var tildes = /~/g;
     var escapedSlash = /~1/g;
     var escapedTilde = /~0/g;
-    function Pointer($ref, path2, friendlyPath) {
+    function Pointer($ref, path, friendlyPath) {
       this.$ref = $ref;
-      this.path = path2;
-      this.originalPath = friendlyPath || path2;
+      this.path = path;
+      this.originalPath = friendlyPath || path;
       this.value = void 0;
       this.circular = false;
       this.indirections = 0;
@@ -19635,8 +19635,8 @@ var require_pointer = __commonJS({
       setValue(this, token, value);
       return obj;
     };
-    Pointer.parse = function(path2, originalPath) {
-      let pointer = url.getHash(path2).substr(1);
+    Pointer.parse = function(path, originalPath) {
+      let pointer = url.getHash(path).substr(1);
       if (!pointer) {
         return [];
       }
@@ -19645,7 +19645,7 @@ var require_pointer = __commonJS({
         pointer[i] = decodeURIComponent(pointer[i].replace(escapedSlash, "/").replace(escapedTilde, "~"));
       }
       if (pointer[0] !== "") {
-        throw new InvalidPointerError(pointer, originalPath === void 0 ? path2 : originalPath);
+        throw new InvalidPointerError(pointer, originalPath === void 0 ? path : originalPath);
       }
       return pointer.slice(1);
     };
@@ -19731,19 +19731,19 @@ var require_ref = __commonJS({
         this.errors.push(normalizeError(err));
       }
     };
-    $Ref.prototype.exists = function(path2, options) {
+    $Ref.prototype.exists = function(path, options) {
       try {
-        this.resolve(path2, options);
+        this.resolve(path, options);
         return true;
       } catch (e) {
         return false;
       }
     };
-    $Ref.prototype.get = function(path2, options) {
-      return this.resolve(path2, options).value;
+    $Ref.prototype.get = function(path, options) {
+      return this.resolve(path, options).value;
     };
-    $Ref.prototype.resolve = function(path2, options, friendlyPath, pathFromRoot) {
-      let pointer = new Pointer(this, path2, friendlyPath);
+    $Ref.prototype.resolve = function(path, options, friendlyPath, pathFromRoot) {
+      let pointer = new Pointer(this, path, friendlyPath);
       try {
         return pointer.resolve(this.value, options, pathFromRoot);
       } catch (err) {
@@ -19760,8 +19760,8 @@ var require_ref = __commonJS({
         return null;
       }
     };
-    $Ref.prototype.set = function(path2, value) {
-      let pointer = new Pointer(this, path2);
+    $Ref.prototype.set = function(path, value) {
+      let pointer = new Pointer(this, path);
       this.value = pointer.set(this.value, value);
     };
     $Ref.is$Ref = function(value) {
@@ -19818,42 +19818,42 @@ var require_refs = __commonJS({
     }
     $Refs.prototype.paths = function(types) {
       let paths = getPaths(this._$refs, arguments);
-      return paths.map((path2) => {
-        return path2.decoded;
+      return paths.map((path) => {
+        return path.decoded;
       });
     };
     $Refs.prototype.values = function(types) {
       let $refs = this._$refs;
       let paths = getPaths($refs, arguments);
-      return paths.reduce((obj, path2) => {
-        obj[path2.decoded] = $refs[path2.encoded].value;
+      return paths.reduce((obj, path) => {
+        obj[path.decoded] = $refs[path.encoded].value;
         return obj;
       }, {});
     };
     $Refs.prototype.toJSON = $Refs.prototype.values;
-    $Refs.prototype.exists = function(path2, options) {
+    $Refs.prototype.exists = function(path, options) {
       try {
-        this._resolve(path2, "", options);
+        this._resolve(path, "", options);
         return true;
       } catch (e) {
         return false;
       }
     };
-    $Refs.prototype.get = function(path2, options) {
-      return this._resolve(path2, "", options).value;
+    $Refs.prototype.get = function(path, options) {
+      return this._resolve(path, "", options).value;
     };
-    $Refs.prototype.set = function(path2, value) {
-      let absPath = url.resolve(this._root$Ref.path, path2);
+    $Refs.prototype.set = function(path, value) {
+      let absPath = url.resolve(this._root$Ref.path, path);
       let withoutHash = url.stripHash(absPath);
       let $ref = this._$refs[withoutHash];
       if (!$ref) {
-        throw ono(`Error resolving $ref pointer "${path2}". 
+        throw ono(`Error resolving $ref pointer "${path}". 
 "${withoutHash}" not found.`);
       }
       $ref.set(absPath, value);
     };
-    $Refs.prototype._add = function(path2) {
-      let withoutHash = url.stripHash(path2);
+    $Refs.prototype._add = function(path) {
+      let withoutHash = url.stripHash(path);
       let $ref = new $Ref();
       $ref.path = withoutHash;
       $ref.$refs = this;
@@ -19861,19 +19861,19 @@ var require_refs = __commonJS({
       this._root$Ref = this._root$Ref || $ref;
       return $ref;
     };
-    $Refs.prototype._resolve = function(path2, pathFromRoot, options) {
-      let absPath = url.resolve(this._root$Ref.path, path2);
+    $Refs.prototype._resolve = function(path, pathFromRoot, options) {
+      let absPath = url.resolve(this._root$Ref.path, path);
       let withoutHash = url.stripHash(absPath);
       let $ref = this._$refs[withoutHash];
       if (!$ref) {
-        throw ono(`Error resolving $ref pointer "${path2}". 
+        throw ono(`Error resolving $ref pointer "${path}". 
 "${withoutHash}" not found.`);
       }
-      return $ref.resolve(absPath, options, path2, pathFromRoot);
+      return $ref.resolve(absPath, options, path, pathFromRoot);
     };
-    $Refs.prototype._get$Ref = function(path2) {
-      path2 = url.resolve(this._root$Ref.path, path2);
-      let withoutHash = url.stripHash(path2);
+    $Refs.prototype._get$Ref = function(path) {
+      path = url.resolve(this._root$Ref.path, path);
+      let withoutHash = url.stripHash(path);
       return this._$refs[withoutHash];
     };
     function getPaths($refs, types) {
@@ -19884,10 +19884,10 @@ var require_refs = __commonJS({
           return types.indexOf($refs[key].pathType) !== -1;
         });
       }
-      return paths.map((path2) => {
+      return paths.map((path) => {
         return {
-          encoded: path2,
-          decoded: $refs[path2].pathType === "file" ? url.toFileSystemPath(path2, true) : path2
+          encoded: path,
+          decoded: $refs[path].pathType === "file" ? url.toFileSystemPath(path, true) : path
         };
       });
     }
@@ -19991,12 +19991,12 @@ var require_parse = __commonJS({
     var plugins = require_plugins();
     var { ResolverError, ParserError, UnmatchedParserError, UnmatchedResolverError, isHandledError } = require_errors();
     module2.exports = parse;
-    async function parse(path2, $refs, options) {
-      path2 = url.stripHash(path2);
-      let $ref = $refs._add(path2);
+    async function parse(path, $refs, options) {
+      path = url.stripHash(path);
+      let $ref = $refs._add(path);
       let file = {
-        url: path2,
-        extension: url.getExtension(path2)
+        url: path,
+        extension: url.getExtension(path)
       };
       try {
         const resolver = await readFile(file, options, $refs);
@@ -20086,16 +20086,16 @@ var require_resolve_external = __commonJS({
         return Promise.reject(e);
       }
     }
-    function crawl(obj, path2, $refs, options, seen) {
+    function crawl(obj, path, $refs, options, seen) {
       seen = seen || new Set();
       let promises = [];
       if (obj && typeof obj === "object" && !ArrayBuffer.isView(obj) && !seen.has(obj)) {
         seen.add(obj);
         if ($Ref.isExternal$Ref(obj)) {
-          promises.push(resolve$Ref(obj, path2, $refs, options));
+          promises.push(resolve$Ref(obj, path, $refs, options));
         } else {
           for (let key of Object.keys(obj)) {
-            let keyPath = Pointer.join(path2, key);
+            let keyPath = Pointer.join(path, key);
             let value = obj[key];
             if ($Ref.isExternal$Ref(value)) {
               promises.push(resolve$Ref(value, keyPath, $refs, options));
@@ -20107,8 +20107,8 @@ var require_resolve_external = __commonJS({
       }
       return promises;
     }
-    async function resolve$Ref($ref, path2, $refs, options) {
-      let resolvedPath = url.resolve(path2, $ref.$ref);
+    async function resolve$Ref($ref, path, $refs, options) {
+      let resolvedPath = url.resolve(path, $ref.$ref);
       let withoutHash = url.stripHash(resolvedPath);
       $ref = $refs._$refs[withoutHash];
       if ($ref) {
@@ -20123,8 +20123,8 @@ var require_resolve_external = __commonJS({
           throw err;
         }
         if ($refs._$refs[withoutHash]) {
-          err.source = url.stripHash(path2);
-          err.path = url.safePointerToPath(url.getHash(path2));
+          err.source = url.stripHash(path);
+          err.path = url.safePointerToPath(url.getHash(path));
         }
         return [];
       }
@@ -20145,11 +20145,11 @@ var require_bundle = __commonJS({
       crawl(parser, "schema", parser.$refs._root$Ref.path + "#", "#", 0, inventory, parser.$refs, options);
       remap(inventory);
     }
-    function crawl(parent, key, path2, pathFromRoot, indirections, inventory, $refs, options) {
+    function crawl(parent, key, path, pathFromRoot, indirections, inventory, $refs, options) {
       let obj = key === null ? parent : parent[key];
       if (obj && typeof obj === "object" && !ArrayBuffer.isView(obj)) {
         if ($Ref.isAllowed$Ref(obj)) {
-          inventory$Ref(parent, key, path2, pathFromRoot, indirections, inventory, $refs, options);
+          inventory$Ref(parent, key, path, pathFromRoot, indirections, inventory, $refs, options);
         } else {
           let keys = Object.keys(obj).sort((a, b) => {
             if (a === "definitions") {
@@ -20161,11 +20161,11 @@ var require_bundle = __commonJS({
             }
           });
           for (let key2 of keys) {
-            let keyPath = Pointer.join(path2, key2);
+            let keyPath = Pointer.join(path, key2);
             let keyPathFromRoot = Pointer.join(pathFromRoot, key2);
             let value = obj[key2];
             if ($Ref.isAllowed$Ref(value)) {
-              inventory$Ref(obj, key2, path2, keyPathFromRoot, indirections, inventory, $refs, options);
+              inventory$Ref(obj, key2, path, keyPathFromRoot, indirections, inventory, $refs, options);
             } else {
               crawl(obj, key2, keyPath, keyPathFromRoot, indirections, inventory, $refs, options);
             }
@@ -20173,9 +20173,9 @@ var require_bundle = __commonJS({
         }
       }
     }
-    function inventory$Ref($refParent, $refKey, path2, pathFromRoot, indirections, inventory, $refs, options) {
+    function inventory$Ref($refParent, $refKey, path, pathFromRoot, indirections, inventory, $refs, options) {
       let $ref = $refKey === null ? $refParent : $refParent[$refKey];
-      let $refPath = url.resolve(path2, $ref.$ref);
+      let $refPath = url.resolve(path, $ref.$ref);
       let pointer = $refs._resolve($refPath, pathFromRoot, options);
       if (pointer === null) {
         return;
@@ -20284,7 +20284,7 @@ var require_dereference = __commonJS({
       parser.$refs.circular = dereferenced.circular;
       parser.schema = dereferenced.value;
     }
-    function crawl(obj, path2, pathFromRoot, parents, processedObjects, dereferencedCache, $refs, options) {
+    function crawl(obj, path, pathFromRoot, parents, processedObjects, dereferencedCache, $refs, options) {
       let dereferenced;
       let result = {
         value: obj,
@@ -20295,12 +20295,12 @@ var require_dereference = __commonJS({
           parents.add(obj);
           processedObjects.add(obj);
           if ($Ref.isAllowed$Ref(obj, options)) {
-            dereferenced = dereference$Ref(obj, path2, pathFromRoot, parents, processedObjects, dereferencedCache, $refs, options);
+            dereferenced = dereference$Ref(obj, path, pathFromRoot, parents, processedObjects, dereferencedCache, $refs, options);
             result.circular = dereferenced.circular;
             result.value = dereferenced.value;
           } else {
             for (const key of Object.keys(obj)) {
-              let keyPath = Pointer.join(path2, key);
+              let keyPath = Pointer.join(path, key);
               let keyPathFromRoot = Pointer.join(pathFromRoot, key);
               let value = obj[key];
               let circular = false;
@@ -20329,8 +20329,8 @@ var require_dereference = __commonJS({
       }
       return result;
     }
-    function dereference$Ref($ref, path2, pathFromRoot, parents, processedObjects, dereferencedCache, $refs, options) {
-      let $refPath = url.resolve(path2, $ref.$ref);
+    function dereference$Ref($ref, path, pathFromRoot, parents, processedObjects, dereferencedCache, $refs, options) {
+      let $refPath = url.resolve(path, $ref.$ref);
       const cache = dereferencedCache.get($refPath);
       if (cache) {
         const refKeys = Object.keys($ref);
@@ -20348,7 +20348,7 @@ var require_dereference = __commonJS({
         }
         return cache;
       }
-      let pointer = $refs._resolve($refPath, path2, options);
+      let pointer = $refs._resolve($refPath, path, options);
       if (pointer === null) {
         return {
           circular: false,
@@ -20357,7 +20357,7 @@ var require_dereference = __commonJS({
       }
       let directCircular = pointer.circular;
       let circular = directCircular || parents.has(pointer.value);
-      circular && foundCircularReference(path2, $refs, options);
+      circular && foundCircularReference(path, $refs, options);
       let dereferencedValue = $Ref.dereference($ref, pointer.value);
       if (!circular) {
         let dereferenced = crawl(dereferencedValue, pointer.path, pathFromRoot, parents, processedObjects, dereferencedCache, $refs, options);
@@ -20416,12 +20416,12 @@ var require_lib3 = __commonJS({
       this.schema = null;
       this.$refs = new $Refs();
     }
-    $RefParser.parse = function parse(path2, schema, options, callback) {
+    $RefParser.parse = function parse(path, schema, options, callback) {
       let Class = this;
       let instance = new Class();
       return instance.parse.apply(instance, arguments);
     };
-    $RefParser.prototype.parse = async function parse(path2, schema, options, callback) {
+    $RefParser.prototype.parse = async function parse(path, schema, options, callback) {
       let args = normalizeArgs(arguments);
       let promise;
       if (!args.path && !args.schema) {
@@ -20466,12 +20466,12 @@ var require_lib3 = __commonJS({
         return maybe(args.callback, Promise.resolve(null));
       }
     };
-    $RefParser.resolve = function resolve2(path2, schema, options, callback) {
+    $RefParser.resolve = function resolve2(path, schema, options, callback) {
       let Class = this;
       let instance = new Class();
       return instance.resolve.apply(instance, arguments);
     };
-    $RefParser.prototype.resolve = async function resolve2(path2, schema, options, callback) {
+    $RefParser.prototype.resolve = async function resolve2(path, schema, options, callback) {
       let me = this;
       let args = normalizeArgs(arguments);
       try {
@@ -20483,12 +20483,12 @@ var require_lib3 = __commonJS({
         return maybe(args.callback, Promise.reject(err));
       }
     };
-    $RefParser.bundle = function bundle(path2, schema, options, callback) {
+    $RefParser.bundle = function bundle(path, schema, options, callback) {
       let Class = this;
       let instance = new Class();
       return instance.bundle.apply(instance, arguments);
     };
-    $RefParser.prototype.bundle = async function bundle(path2, schema, options, callback) {
+    $RefParser.prototype.bundle = async function bundle(path, schema, options, callback) {
       let me = this;
       let args = normalizeArgs(arguments);
       try {
@@ -20500,12 +20500,12 @@ var require_lib3 = __commonJS({
         return maybe(args.callback, Promise.reject(err));
       }
     };
-    $RefParser.dereference = function dereference(path2, schema, options, callback) {
+    $RefParser.dereference = function dereference(path, schema, options, callback) {
       let Class = this;
       let instance = new Class();
       return instance.dereference.apply(instance, arguments);
     };
-    $RefParser.prototype.dereference = async function dereference(path2, schema, options, callback) {
+    $RefParser.prototype.dereference = async function dereference(path, schema, options, callback) {
       let me = this;
       let args = normalizeArgs(arguments);
       try {
@@ -20555,7 +20555,7 @@ var require_lib4 = __commonJS({
         return this.schema;
       }
     });
-    SwaggerParser2.prototype.parse = async function(path2, api, options, callback) {
+    SwaggerParser2.prototype.parse = async function(path, api, options, callback) {
       let args = normalizeArgs(arguments);
       args.options = new Options(args.options);
       try {
@@ -20587,12 +20587,12 @@ var require_lib4 = __commonJS({
         return maybe(args.callback, Promise.reject(err));
       }
     };
-    SwaggerParser2.validate = function(path2, api, options, callback) {
+    SwaggerParser2.validate = function(path, api, options, callback) {
       let Class = this;
       let instance = new Class();
       return instance.validate.apply(instance, arguments);
     };
-    SwaggerParser2.prototype.validate = async function(path2, api, options, callback) {
+    SwaggerParser2.prototype.validate = async function(path, api, options, callback) {
       let me = this;
       let args = normalizeArgs(arguments);
       args.options = new Options(args.options);
@@ -22674,10 +22674,10 @@ function createGitBookOpenAPITag(endpoint, openAPIFilename) {
 {% endswagger %}`;
 }
 function createTagPage(tag, endpoints, openAPIFilename) {
-  const path2 = `${import_case.default.kebab(tag.name)}.md`;
+  const path = `${import_case.default.kebab(tag.name)}.md`;
   return {
     title: tag.name,
-    path: path2,
+    path,
     contents: `
 # ${tag.name || ""}
 
@@ -22692,9 +22692,9 @@ ${endpoints.map((endpoint) => createGitBookOpenAPITag(endpoint, openAPIFilename)
 function createSummaryFile(gitBookFiles) {
   const summaryFile = `# Table of contents
 
-${gitBookFiles.map(({ path: path2, title, contents }) => {
-    const p = (0, import_path2.basename)(path2, ".md");
-    return `- [${title}](${path2.replaceAll(" ", "\\ ")})`;
+${gitBookFiles.map(({ path, title, contents }) => {
+    const p = (0, import_path2.basename)(path, ".md");
+    return `- [${title}](${path.replaceAll(" ", "\\ ")})`;
   }).join("\n")}`;
   console.log(summaryFile);
   return summaryFile;
@@ -22710,17 +22710,17 @@ function makePagesForTagGroups(map, openAPIFilename) {
 function collateTags(api) {
   const tagMap = new Map();
   const untaggedTag = { name: "__internal-untagged" };
-  const operations = Object.entries(api.paths).flatMap(([path2, operations2]) => {
+  const operations = Object.entries(api.paths).flatMap(([path, operations2]) => {
     return Object.entries(operations2).map(([operation, operationObject]) => {
-      return { path: path2, operation, operationObject };
+      return { path, operation, operationObject };
     });
   });
   const generatedTagCache = new Set();
-  operations.forEach(({ path: path2, operation, operationObject }) => {
+  operations.forEach(({ path, operation, operationObject }) => {
     if (operationObject.tags.length === 0) {
       tagMap.set(untaggedTag, [
         ...tagMap.get(untaggedTag) || [],
-        { path: path2, operation, operationObject }
+        { path, operation, operationObject }
       ]);
     }
     operationObject.tags.forEach((tagName) => {
@@ -22740,7 +22740,7 @@ function collateTags(api) {
       }
       tagMap.set(tag, [
         ...tagMap.get(tag) || [],
-        { path: path2, operation, operationObject }
+        { path, operation, operationObject }
       ]);
     });
   });
@@ -22749,7 +22749,7 @@ function collateTags(api) {
 async function cliEntrypoint(openAPIFilePath) {
   const api = await import_swagger_parser.default.validate(openAPIFilePath);
   const endpointsGroupedByTag = collateTags(api);
-  const openAPIFilename = import_path.default.posix.basename(openAPIFilePath);
+  const openAPIFilename = import_path.posix.basename(openAPIFilePath);
   const contentPages = makePagesForTagGroups(endpointsGroupedByTag, openAPIFilename);
   return [
     ...contentPages,
@@ -22783,8 +22783,8 @@ async function main() {
   console.log(openApiFileLocation);
   const result = await cliEntrypoint(openApiFileLocation);
   import_promises.default.mkdir((0, import_path3.resolve)(destinationFolder), { recursive: true });
-  for (let { path: path2, contents } of result) {
-    const fullPath = (0, import_path3.resolve)(destinationFolder, path2);
+  for (let { path, contents } of result) {
+    const fullPath = (0, import_path3.resolve)(destinationFolder, path);
     import_promises.default.writeFile(fullPath, contents);
   }
   import_promises.default.writeFile((0, import_path3.resolve)(".gitbook.yaml"), `root: ${destinationFolder}`);

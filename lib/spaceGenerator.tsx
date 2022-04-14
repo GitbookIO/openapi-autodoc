@@ -1,4 +1,4 @@
-import path from 'path';
+import { posix } from 'path';
 
 import SwaggerParser from "@apidevtools/swagger-parser";
 import { OpenAPI } from "openapi-types";
@@ -132,7 +132,7 @@ export async function cliEntrypoint(openAPIFilePath: string) {
   const api = await SwaggerParser.validate(openAPIFilePath);
   const endpointsGroupedByTag = collateTags(api);
 
-  const openAPIFilename = path.posix.basename(openAPIFilePath);
+  const openAPIFilename = posix.basename(openAPIFilePath);
   const contentPages = makePagesForTagGroups(endpointsGroupedByTag, openAPIFilename);
   return [
     ...contentPages,
