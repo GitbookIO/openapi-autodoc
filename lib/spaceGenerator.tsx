@@ -1,8 +1,9 @@
+import { posix } from 'path';
+
 import SwaggerParser from "@apidevtools/swagger-parser";
 import { OpenAPI } from "openapi-types";
 import { basename } from "path";
 import Case from "case";
-import JSZip from "jszip";
 
 interface GitBookFile {
   title: string;
@@ -10,14 +11,14 @@ interface GitBookFile {
   contents: string;
 }
 
-function createGitBookOpenAPITag(endpoint: Endpoint) {
+function createGitBookOpenAPITag(endpoint: Endpoint, openAPIFilename: string) {
   return `
-{% swagger src="./.gitbook/assets/openapi.yaml" path="${endpoint.path}" method="${endpoint.operation}" %}
-[openapi.yaml](<./.gitbook/assets/openapi.yaml>)
+{% swagger src="./.gitbook/assets/${openAPIFilename}" path="${endpoint.path}" method="${endpoint.operation}" %}
+[${openAPIFilename}](<./.gitbook/assets/${openAPIFilename}>)
 {% endswagger %}`;
 }
 
-function createTagPage(tag: TagObject, endpoints: Endpoint[]): GitBookFile {
+function createTagPage(tag: TagObject, endpoints: Endpoint[], openAPIFilename: string): GitBookFile {
   const path = `${Case.kebab(tag.name)}.md`;
   return {
     title: tag.name,
@@ -33,7 +34,7 @@ ${
     : ""
 }
 
-${endpoints.map(createGitBookOpenAPITag).join("\n\n")}
+${endpoints.map(endpoint => createGitBookOpenAPITag(endpoint, openAPIFilename)).join("\n\n")}
   `.trim(),
   };
 }
@@ -55,20 +56,6 @@ function createReadmeFile(spec: OpenAPI.Document) {
   return `# ${spec.info.title}`;
 }
 
-export async function createZipBundle(
-  gitBookFiles: GitBookFile[],
-  spec: string,
-  parsedSpec: OpenAPI.Document
-) {
-  const bundle = new JSZip();
-  gitBookFiles.forEach(({ path, contents }) => {
-    bundle.file(path, contents);
-  });
-  const gitbookPrivateFolder = bundle.folder(".gitbook");
-  gitbookPrivateFolder.file("openapi.yaml", spec);
-  return await bundle.generateAsync({ type: "blob" });
-}
-
 interface Endpoint {
   operationObject: OperationObject;
   path: string;
@@ -79,10 +66,10 @@ type TagObject = OpenAPI.Document["tags"][0];
 type OperationsObject = OpenAPI.Document["paths"][string];
 type OperationObject = OperationsObject["get"];
 
-export function makePagesForTagGroups(map: Map<TagObject, Endpoint[]>) {
+export function makePagesForTagGroups(map: Map<TagObject, Endpoint[]>, openAPIFilename: string) {
   return Array.from(map.entries()).map(
     ([tag, endpoint]: [TagObject, Endpoint[]]) => {
-      return createTagPage(tag, endpoint);
+      return createTagPage(tag, endpoint, openAPIFilename);
     }
   );
 }
@@ -141,35 +128,13 @@ export function collateTags(api: OpenAPI.Document) {
   return tagMap;
 }
 
-export async function prepareBundleForSpec(
-  apiObject: any,
-  filecontentsdecoded: string
-) {
-  let api = await SwaggerParser.validate(apiObject);
-  let endpointsGroupedByTag = collateTags(api);
-  let contentPages = makePagesForTagGroups(endpointsGroupedByTag);
-  let pages = [
-    ...contentPages,
-    {
-      title: "README",
-      path: "README.md",
-      contents: createReadmeFile(api),
-    },
-    {
-      title: "Summary",
-      path: "SUMMARY.md",
-      contents: createSummaryFile(contentPages),
-    },
-  ];
-  const bundle = await createZipBundle(pages, filecontentsdecoded, api);
-  return bundle;
-}
+export async function cliEntrypoint(openAPIFilePath: string) {
+  const api = await SwaggerParser.validate(openAPIFilePath);
+  const endpointsGroupedByTag = collateTags(api);
 
-export async function cliEntrypoint(filename: string) {
-  let api = await SwaggerParser.validate(filename);
-  let endpointsGroupedByTag = collateTags(api);
-  let contentPages = makePagesForTagGroups(endpointsGroupedByTag);
-  let pages = [
+  const openAPIFilename = posix.basename(openAPIFilePath);
+  const contentPages = makePagesForTagGroups(endpointsGroupedByTag, openAPIFilename);
+  return [
     ...contentPages,
     {
       path: "README.md",
@@ -180,5 +145,4 @@ export async function cliEntrypoint(filename: string) {
       contents: createSummaryFile(contentPages),
     },
   ];
-  return pages;
 }
