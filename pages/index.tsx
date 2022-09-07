@@ -110,13 +110,14 @@ function collateTags(api: OpenAPI.Document) {
     }
   );
   operations.forEach(({ path, operation, operationObject }) => {
-    if (operationObject.tags.length === 0) {
+    const tags = operationObject.tags ?? [];
+    if (tags.length === 0) {
       tagMap.set(untaggedTag, [
         ...(tagMap.get(untaggedTag) || []),
         { path, operation, operationObject },
       ]);
     }
-    operationObject.tags.forEach((tagName) => {
+    tags.forEach((tagName) => {
       const tag: TagObject = api.tags.find(({ name }) => {
         return name === tagName;
       });

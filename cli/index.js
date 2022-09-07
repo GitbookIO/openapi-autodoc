@@ -22717,13 +22717,15 @@ function collateTags(api) {
   });
   const generatedTagCache = new Set();
   operations.forEach(({ path, operation, operationObject }) => {
-    if (operationObject.tags.length === 0) {
+    var _a;
+    const tags = (_a = operationObject.tags) != null ? _a : [];
+    if (tags.length === 0) {
       tagMap.set(untaggedTag, [
         ...tagMap.get(untaggedTag) || [],
         { path, operation, operationObject }
       ]);
     }
-    operationObject.tags.forEach((tagName) => {
+    tags.forEach((tagName) => {
       let tag;
       if (api.tags) {
         tag = api.tags.find(({ name }) => {
