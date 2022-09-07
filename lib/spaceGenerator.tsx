@@ -96,13 +96,14 @@ export function collateTags(api: OpenAPI.Document) {
   const generatedTagCache = new Set<TagObject>();
 
   operations.forEach(({ path, operation, operationObject }) => {
-    if (operationObject.tags.length === 0) {
+    const tags = operationObject.tags ?? [];
+    if (tags.length === 0) {
       tagMap.set(untaggedTag, [
         ...(tagMap.get(untaggedTag) || []),
         { path, operation, operationObject },
       ]);
     }
-    operationObject.tags.forEach((tagName) => {
+    tags.forEach((tagName) => {
       let tag: TagObject;
       if (api.tags) {
         tag = api.tags.find(({ name }) => {
